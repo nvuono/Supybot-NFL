@@ -1918,7 +1918,7 @@ class NFL(callbacks.Plugin):
 
     nflcountdown = wrap(nflcountdown)
 
-    def pffteam(self, irc, msg, args, optyear, optround):
+    def pffteam(self, irc, msg, args, optteam, optyear):
         """[YYYY] 
         Display overall PFF team stats for a given season    """
 
@@ -1973,7 +1973,7 @@ class NFL(callbacks.Plugin):
         # output time.
         irc.reply("{0} :: {1}".format(self._red(h2), " | ".join([i for i in object_list])))
 
-    pffteam = wrap(pffteam, [optional('int')])
+    pffteam = wrap(pffteam, [optional('somethingWithoutSpaces'), optional('int')])
 
     def nfldraft(self, irc, msg, args, optyear, optround):
         """[YYYY] [round #]
