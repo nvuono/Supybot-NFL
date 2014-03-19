@@ -1923,16 +1923,17 @@ class NFL(callbacks.Plugin):
     nflcountdown = wrap(nflcountdown)
 
     def pffteam(self, irc, msg, args, optteam, optyear):
-        """[YYYY] 
+        """[Team Name] [YYYY] 
         Display overall PFF team stats for a given season    """
-
-        irc.reply("This is not really implemented yet")
 
         try:  # try to see if each key is set.
             pffCookie = self.registryValue('pffCookie')
         except:  # a key is not set, break and error.
             self.log.debug("Failed checking keys. We're missing the config value for: {0}. Please set this and try again.".format('pffCookie'))
             irc.reply("No PFF cookie set")
+
+        optteam = self._validteams(optteam)
+        teamFull = self._translateTeam('team', 'full', optteam)
 
         # defaults to latest year/1st round. input can change this otherwise.
         if optyear:  # test year.
@@ -1970,10 +1971,8 @@ class NFL(callbacks.Plugin):
             tds = row.findAll('td')
             if len(tds) == 13:
                 pickTeam = tds[0].getText()
-                if pickTeam == "Philadelphia Eagles":
-                    appendString = "{0}. {1} - {2} ".format(self._bold(pickTeam), tds[1].getText(), tds[2].getText())
-                elif pickTeam == "&nbsp;Philadelphia Eagles":
-                    appendString += tds[1].getText() + ", "
+                if pickTeam == teamFull:
+                    appendString = self._bold(pickTeam) + " - " + tds[1].getText() + ", "
                     appendString += tds[2].getText() + ", "
                     appendString += tds[3].getText() + ", "
                     appendString += tds[4].getText() + ", "
@@ -1985,9 +1984,8 @@ class NFL(callbacks.Plugin):
                     appendString += tds[10].getText() + ", "
                     appendString += tds[11].getText() + ", "
                     appendString += tds[12].getText()
-                
                 else:  # we won't have a pick leading up to the draft.
-                    appendString = "no matching team"
+                    appendString = ""
                 object_list.append(appendString)  # append.
 
         # output time.
