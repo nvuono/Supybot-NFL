@@ -127,7 +127,11 @@ class NFL(callbacks.Plugin):
             if h and d:
                 page = utils.web.getUrl(url, headers=h, data=d)
             else:
-                h = {"User-Agent":"Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0"}
+                if not h:
+                    h = {"User-Agent":"Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0"}
+                else:
+                    if not h["User-Agent"]:
+                        h["User-Agent"] = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.154 Safari/537.36"
                 page = utils.web.getUrl(url, headers=h)
             return page
         except utils.web.Error as e:
@@ -1923,12 +1927,11 @@ class NFL(callbacks.Plugin):
         Display overall PFF team stats for a given season    """
 
         irc.reply("This is not really implemented yet")
-        pffCookie = ""
 
         try:  # try to see if each key is set.
             pffCookie = self.registryValue('pffCookie')
         except:  # a key is not set, break and error.
-            self.log.debug("Failed checking keys. We're missing the config value for: {0}. Please set this and try again.".format(checkKey))
+            self.log.debug("Failed checking keys. We're missing the config value for: {0}. Please set this and try again.".format('pffCookie'))
             irc.reply("No PFF cookie set")
 
         # defaults to latest year/1st round. input can change this otherwise.
@@ -1946,7 +1949,7 @@ class NFL(callbacks.Plugin):
         if optyear:  # add year if we have it.
             url += '?SEASON=%s' % (optyear)
 
-        html = self._httpget(url, h={'Cookie':pffCookie})
+        html = self._httpget(url, h={'Cookie':pffCookie},d={})
 
         if not html:
             irc.reply("ERROR: Failed to fetch {0}.".format(url))
