@@ -130,7 +130,7 @@ class NFL(callbacks.Plugin):
                 if not h:
                     h = {"User-Agent":"Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0"}
                 else:
-                    if not h["User-Agent"]:
+                    if h.get("User-Agent") is None:
                         h["User-Agent"] = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.154 Safari/537.36"
                 page = utils.web.getUrl(url, headers=h)
             return page
