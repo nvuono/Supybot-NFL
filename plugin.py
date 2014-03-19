@@ -1922,32 +1922,34 @@ class NFL(callbacks.Plugin):
 
     nflcountdown = wrap(nflcountdown)
 
-    class PffTeam(UserDict):
-        def __init__(self,pffRow):
-            tds = row.findAll('td')
-            self["FullName"] = tds[0].getText()
-            self["OffOverall"] = tds[1].getText()
-            self["OffPass"] = tds[2].getText()
-            self["OffRush"] = tds[3].getText()
-            self["OffPassBlock"] = tds[4].getText()
-            self["OffRunBlock"] = tds[5].getText()
-            self["OffPen"] = tds[6].getText()
-            self["DefOverall"] = tds[7].getText()
-            self["DefRun"] = tds[8].getText()
-            self["DefPassRush"] = tds[9].getText()
-            self["DefPassCoverage"] = tds[10].getText()
-            self["DefPen"] = tds[11].getText()
-            self["SpecialTeams"] = tds[12].getText()
+    class PffTeam:
+        def __init__(self,pffRow=None):
+            if pffRow:
+                self.FullName = pffRow[0].getText()
+                self.OffOverall = pffRow[1].getText()
+                self.OffPass = pffRow[2].getText()
+                self.OffRush = pffRow[3].getText()
+                self.OffPassBlock = pffRow[4].getText()
+                self.OffRunBlock = pffRow[5].getText()
+                self.OffPen = pffRow[6].getText()
+                self.DefOverall= pffRow[7].getText()
+                self.DefRun = pffRow[8].getText()
+                self.DefPassRush = pffRow[9].getText()
+                self.DefPassCoverage = pffRow[10].getText()
+                self.DefPen = pffRow[11].getText()
+                self.SpecialTeams = pffRow[12].getText()
+            else:
+                self.FullName = "Not Found"
 
-    def pffteam(self, team, year):
+    def pffTeamLookup(self, team, optyear):
         try:  # try to see if each key is set.
             pffCookie = self.registryValue('pffCookie')
         except:  # a key is not set, break and error.
             self.log.debug("Failed checking keys. We're missing the config value for: {0}. Please set this and try again.".format('pffCookie'))
             irc.reply("No PFF cookie set")
 
-        optteam = self._validteams(optteam)
-        teamFull = self._translateTeam('full', 'team', optteam)
+        teamAbbrev = self._validteams(team)
+        teamFull = self._translateTeam('full', 'team', teamAbbrev)
 
         # defaults to latest year/1st round. input can change this otherwise.
         if optyear:  # test year.
@@ -1971,9 +1973,6 @@ class NFL(callbacks.Plugin):
             self.log.error("ERROR opening {0}".format(url))
             return
         
-        irc.reply(html)
-        self.log.error(html)
-
         soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
         table = soup.find('table', attrs={'class':'sortable'})
         h2 = 'PFF Team Stats' #soup.find('h2').getText().strip()
@@ -1986,34 +1985,29 @@ class NFL(callbacks.Plugin):
             if len(tds) == 13:
                 pickTeam = tds[0].getText()
                 if pickTeam == teamFull:
-                    return PffTeam(tds)
+                    return self.PffTeam(tds)
 
 
     def pffteam(self, irc, msg, args, optteam, optyear):
         """[Team Name] [YYYY] 
         Display overall PFF team stats for a given season    """
 
-        teamStats = pffteam(self,optteam,optyear)
+        teamStats = self.pffTeamLookup(optteam,optyear)
+        appendString = ""
 
         if teamStats:
-            appendString = self._bold(teamStats.FullName) + " - " + teamStats.OffOverall + ", "
-            appendString += tds[2].getText() + ", "
-            appendString += tds[3].getText() + ", "
-            appendString += tds[4].getText() + ", "
-            appendString += tds[5].getText() + ", "
-            appendString += tds[6].getText() + ", "
-            appendString += tds[7].getText() + ", "
-            appendString += tds[8].getText() + ", "
-            appendString += tds[9].getText() + ", "
-            appendString += tds[10].getText() + ", "
-            appendString += tds[11].getText() + ", "
-            appendString += tds[12].getText()
-        else:  # we won't have a pick leading up to the draft.
+            appendString = self._bold("Offense")
+            appendString += "(OVR:" + teamStats.OffOverall + ", PAS/RSH: " + teamStats.OffPass + "/" + teamStats.OffRush + ", PassBlk/Runblk:" + teamStats.OffPassBlock + "/" + teamStats.OffRunBlock + ") "
+            appendString += self._bold("Defense")
+            appendString += "(OVR:" + teamStats.DefOverall + ", Run/Rush/Cvr: " + teamStats.DefRun + "/" + teamStats.DefPassRush + "/" + teamStats.DefPassCoverage + ") "
+            # self.OffPen = pffRow[6].getText()
+            # self.DefPen = pffRow[11].getText()
+            appendString += "ST: " + teamStats.SpecialTeams
+        else:  
             appendString = ""
-        object_list.append(appendString)  # append.
 
         # output time.
-        irc.reply("{0} :: {1}".format(self._red(h2), " | ".join([i for i in object_list])))
+        irc.reply("{0} :: {1}".format(self._red(teamStats.FullName), appendString))
 
     pffteam = wrap(pffteam, [optional('somethingWithoutSpaces'), optional('int')])
 
