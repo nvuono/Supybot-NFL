@@ -1910,7 +1910,7 @@ class NFL(callbacks.Plugin):
     nflschedule = wrap(nflschedule, [(getopts({'full':''})), ('somethingWithoutSpaces')])
 
     def nflcountdown(self, irc, msg, args):
-        """
+	    """
         Display the time until the next NFL season starts.
         """
 
@@ -1920,7 +1920,12 @@ class NFL(callbacks.Plugin):
 
     nflcountdown = wrap(nflcountdown)
 
-    def pffteam(self, irc, msg, args, optyear):
+    def pffteam(self, irc, msg, args, optyear, optround):
+        """[YYYY] [round #]
+        Display overall PFF team stats for a given season
+        """
+
+	
 		irc.reply("This is not really implemented yet")
 		pffCookie = ""
 		
@@ -1931,21 +1936,21 @@ class NFL(callbacks.Plugin):
 			irc.reply("No PFF cookie set")
 			break
 
-	        # defaults to latest year/1st round. input can change this otherwise.
-        if optyear:  # test year.
-            testdate = self._validate(optyear, '%Y')
-            if not testdate:  # invalid year.
-                irc.reply("ERROR: Invalid year. Must be YYYY.")
-                return
-            if not 2007 <= optyear <= datetime.datetime.now().year:
-                irc.reply("ERROR: Year must be after 2007 and before the current year.")
-                return
+	# defaults to latest year/1st round. input can change this otherwise.
+	if optyear:  # test year.
+		testdate = self._validate(optyear, '%Y')
+		if not testdate:  # invalid year.
+			irc.reply("ERROR: Invalid year. Must be YYYY.")
+			return
+		if not 2007 <= optyear <= datetime.datetime.now().year:
+			irc.reply("ERROR: Year must be after 2007 and before the current year.")
+			return
 				
 		url = self._b64decode('aHR0cHM6Ly93d3cucHJvZm9vdGJhbGxmb2N1cy5jb20vZGF0YS9ieV90ZWFtLnBocD90YWI9YnlfdGVhbQ==')	
 
 		if optyear:  # add year if we have it.
 			url += '?SEASON=%s' % (optyear)
-	
+
 		html = self._httpget(url, h={'Cookie':pffCookie})
 		
 		if not html:
@@ -1955,25 +1960,25 @@ class NFL(callbacks.Plugin):
 		
 		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
 		table = soup.find('table', attrs={'class':'sortable'})
-        h2 = 'PFF Team Stats' #soup.find('h2').getText().strip()
-        rows = table.findAll('tr')
-        # container list for output.
-        object_list = []
-        # iterate over each row which is a pick.
-        for row in rows:  # string is constructed conditionally.
-            pickTeam = row.children[0].getText()
-            if pickTeam = "Philadelphia Eagles":
-                appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText())
+		h2 = 'PFF Team Stats' #soup.find('h2').getText().strip()
+		rows = table.findAll('tr')
+		# container list for output.
+		object_list = []
+		# iterate over each row which is a pick.
+		for row in rows:  # string is constructed conditionally.
+			pickTeam = row.children[0].getText()
+			if pickTeam = "Philadelphia Eagles":
+				appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText())
 			else if pickTeam = "&nbsp;Philadelphia Eagles":
 				appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText() " .")
-            else:  # we won't have a pick leading up to the draft.
-                appendString = "no matching team"
-            
-            object_list.append(appendString)  # append.
-        # output time.
-        irc.reply("{0} :: {1}".format(self._red(h2), " | ".join([i for i in object_list])))
+			else:  # we won't have a pick leading up to the draft.
+				appendString = "no matching team"
 			
-	pffteam = wrap(pffteam)
+			object_list.append(appendString)  # append.
+		# output time.
+		irc.reply("{0} :: {1}".format(self._red(h2), " | ".join([i for i in object_list])))
+		
+	pffteam = wrap(pffteam, [optional('int')])
 
     def nfldraft(self, irc, msg, args, optyear, optround):
         """[YYYY] [round #]
