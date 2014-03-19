@@ -1952,6 +1952,9 @@ class NFL(callbacks.Plugin):
             irc.reply("ERROR: Failed to fetch {0}.".format(url))
             self.log.error("ERROR opening {0}".format(url))
             return
+        
+        irc.reply(html)
+        self.log.error(html)
 
         soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
         table = soup.find('table', attrs={'class':'sortable'})
