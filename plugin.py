@@ -1922,10 +1922,24 @@ class NFL(callbacks.Plugin):
 
     nflcountdown = wrap(nflcountdown)
 
-    def pffteam(self, irc, msg, args, optteam, optyear):
-        """[Team Name] [YYYY] 
-        Display overall PFF team stats for a given season    """
+    class PffTeam(UserDict):
+        def __init__(self,pffRow):
+            tds = row.findAll('td')
+            self["FullName"] = tds[0].getText()
+            self["OffOverall"] = tds[1].getText()
+            self["OffPass"] = tds[2].getText()
+            self["OffRush"] = tds[3].getText()
+            self["OffPassBlock"] = tds[4].getText()
+            self["OffRunBlock"] = tds[5].getText()
+            self["OffPen"] = tds[6].getText()
+            self["DefOverall"] = tds[7].getText()
+            self["DefRun"] = tds[8].getText()
+            self["DefPassRush"] = tds[9].getText()
+            self["DefPassCoverage"] = tds[10].getText()
+            self["DefPen"] = tds[11].getText()
+            self["SpecialTeams"] = tds[12].getText()
 
+    def pffteam(self, team, year):
         try:  # try to see if each key is set.
             pffCookie = self.registryValue('pffCookie')
         except:  # a key is not set, break and error.
@@ -1972,21 +1986,31 @@ class NFL(callbacks.Plugin):
             if len(tds) == 13:
                 pickTeam = tds[0].getText()
                 if pickTeam == teamFull:
-                    appendString = self._bold(pickTeam) + " - " + tds[1].getText() + ", "
-                    appendString += tds[2].getText() + ", "
-                    appendString += tds[3].getText() + ", "
-                    appendString += tds[4].getText() + ", "
-                    appendString += tds[5].getText() + ", "
-                    appendString += tds[6].getText() + ", "
-                    appendString += tds[7].getText() + ", "
-                    appendString += tds[8].getText() + ", "
-                    appendString += tds[9].getText() + ", "
-                    appendString += tds[10].getText() + ", "
-                    appendString += tds[11].getText() + ", "
-                    appendString += tds[12].getText()
-                else:  # we won't have a pick leading up to the draft.
-                    appendString = ""
-                object_list.append(appendString)  # append.
+                    return PffTeam(tds)
+
+
+    def pffteam(self, irc, msg, args, optteam, optyear):
+        """[Team Name] [YYYY] 
+        Display overall PFF team stats for a given season    """
+
+        teamStats = pffteam(self,optteam,optyear)
+
+        if teamStats:
+            appendString = self._bold(teamStats.FullName) + " - " + teamStats.OffOverall + ", "
+            appendString += tds[2].getText() + ", "
+            appendString += tds[3].getText() + ", "
+            appendString += tds[4].getText() + ", "
+            appendString += tds[5].getText() + ", "
+            appendString += tds[6].getText() + ", "
+            appendString += tds[7].getText() + ", "
+            appendString += tds[8].getText() + ", "
+            appendString += tds[9].getText() + ", "
+            appendString += tds[10].getText() + ", "
+            appendString += tds[11].getText() + ", "
+            appendString += tds[12].getText()
+        else:  # we won't have a pick leading up to the draft.
+            appendString = ""
+        object_list.append(appendString)  # append.
 
         # output time.
         irc.reply("{0} :: {1}".format(self._red(h2), " | ".join([i for i in object_list])))
