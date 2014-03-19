@@ -1919,11 +1919,10 @@ class NFL(callbacks.Plugin):
     nflcountdown = wrap(nflcountdown)
 
     def pffteam(self, irc, msg, args, optyear, optround):
-        """[YYYY] [round #]
+        """[YYYY] 
         Display overall PFF team stats for a given season
         """
 
-	
 		irc.reply("This is not really implemented yet")
 		pffCookie = ""
 		
