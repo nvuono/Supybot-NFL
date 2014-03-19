@@ -1967,11 +1967,25 @@ class NFL(callbacks.Plugin):
         object_list = []
         # iterate over each row which is a pick.
         for row in rows:  # string is constructed conditionally.
-            pickTeam = row.children[0].getText()
+            tds = row.findAll('td')
+
+            pickTeam = tds[0].getText()
             if pickTeam == "Philadelphia Eagles":
-                appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText())
+                appendString = "{0}. {1} - {2} ".format(self._bold(pickTeam), tds[1].getText(), tds[2].getText())
             elif pickTeam == "&nbsp;Philadelphia Eagles":
-                appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText(), " .")
+                appendString += tds[1].getText() + ", "
+                appendString += tds[2].getText() + ", "
+                appendString += tds[3].getText() + ", "
+                appendString += tds[4].getText() + ", "
+                appendString += tds[5].getText() + ", "
+                appendString += tds[6].getText() + ", "
+                appendString += tds[7].getText() + ", "
+                appendString += tds[8].getText() + ", "
+                appendString += tds[9].getText() + ", "
+                appendString += tds[10].getText() + ", "
+                appendString += tds[11].getText() + ", "
+                appendString += tds[12].getText()
+                
             else:  # we won't have a pick leading up to the draft.
                 appendString = "no matching team"
             object_list.append(appendString)  # append.
