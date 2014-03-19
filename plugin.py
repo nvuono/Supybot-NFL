@@ -1933,7 +1933,7 @@ class NFL(callbacks.Plugin):
             irc.reply("No PFF cookie set")
 
         optteam = self._validteams(optteam)
-        teamFull = self._translateTeam('team', 'full', optteam)
+        teamFull = self._translateTeam('full', 'team', optteam)
 
         # defaults to latest year/1st round. input can change this otherwise.
         if optyear:  # test year.
