@@ -1912,7 +1912,7 @@ class NFL(callbacks.Plugin):
     def nflcountdown(self, irc, msg, args):
         """    Display the time until the next NFL season starts.    """
 
-        dDelta = datetime.datetime(2014, 9, 05, 21, 30) - datetime.datetime.now()
+        dDelta = datetime.datetime(2014, 9, 5, 21, 30) - datetime.datetime.now()
         irc.reply("There are {0} days {1} hours {2} minutes {3} seconds until the start of the 2014 NFL Season.".format(\
                                             dDelta.days, dDelta.seconds/60/60, dDelta.seconds/60%60, dDelta.seconds%60))
 
@@ -1920,62 +1920,60 @@ class NFL(callbacks.Plugin):
 
     def pffteam(self, irc, msg, args, optyear, optround):
         """[YYYY] 
-        Display overall PFF team stats for a given season
-        """
+        Display overall PFF team stats for a given season    """
 
-		irc.reply("This is not really implemented yet")
-		pffCookie = ""
-		
-		try:  # try to see if each key is set.
-			pffCookie = self.registryValue('pffCookie')
-		except:  # a key is not set, break and error.
-			self.log.debug("Failed checking keys. We're missing the config value for: {0}. Please set this and try again.".format(checkKey))
-			irc.reply("No PFF cookie set")
-			break
+        irc.reply("This is not really implemented yet")
+        pffCookie = ""
 
-	# defaults to latest year/1st round. input can change this otherwise.
-	if optyear:  # test year.
-		testdate = self._validate(optyear, '%Y')
-		if not testdate:  # invalid year.
-			irc.reply("ERROR: Invalid year. Must be YYYY.")
-			return
-		if not 2007 <= optyear <= datetime.datetime.now().year:
-			irc.reply("ERROR: Year must be after 2007 and before the current year.")
-			return
-				
-		url = self._b64decode('aHR0cHM6Ly93d3cucHJvZm9vdGJhbGxmb2N1cy5jb20vZGF0YS9ieV90ZWFtLnBocD90YWI9YnlfdGVhbQ==')	
+        try:  # try to see if each key is set.
+            pffCookie = self.registryValue('pffCookie')
+        except:  # a key is not set, break and error.
+            self.log.debug("Failed checking keys. We're missing the config value for: {0}. Please set this and try again.".format(checkKey))
+            irc.reply("No PFF cookie set")
 
-		if optyear:  # add year if we have it.
-			url += '?SEASON=%s' % (optyear)
+        # defaults to latest year/1st round. input can change this otherwise.
+        if optyear:  # test year.
+            testdate = self._validate(optyear, '%Y')
+            if not testdate:  # invalid year.
+                irc.reply("ERROR: Invalid year. Must be YYYY.")
+                return
+            if not 2007 <= optyear <= datetime.datetime.now().year:
+                irc.reply("ERROR: Year must be after 2007 and before the current year.")
+                return
 
-		html = self._httpget(url, h={'Cookie':pffCookie})
-		
-		if not html:
-				irc.reply("ERROR: Failed to fetch {0}.".format(url))
-				self.log.error("ERROR opening {0}".format(url))
-				return
-		
-		soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
-		table = soup.find('table', attrs={'class':'sortable'})
-		h2 = 'PFF Team Stats' #soup.find('h2').getText().strip()
-		rows = table.findAll('tr')
-		# container list for output.
-		object_list = []
-		# iterate over each row which is a pick.
-		for row in rows:  # string is constructed conditionally.
-			pickTeam = row.children[0].getText()
-			if pickTeam = "Philadelphia Eagles":
-				appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText())
-			else if pickTeam = "&nbsp;Philadelphia Eagles":
-				appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText() " .")
-			else:  # we won't have a pick leading up to the draft.
-				appendString = "no matching team"
-			
-			object_list.append(appendString)  # append.
-		# output time.
-		irc.reply("{0} :: {1}".format(self._red(h2), " | ".join([i for i in object_list])))
-		
-	pffteam = wrap(pffteam, [optional('int')])
+        url = self._b64decode('aHR0cHM6Ly93d3cucHJvZm9vdGJhbGxmb2N1cy5jb20vZGF0YS9ieV90ZWFtLnBocD90YWI9YnlfdGVhbQ==')	
+
+        if optyear:  # add year if we have it.
+            url += '?SEASON=%s' % (optyear)
+
+        html = self._httpget(url, h={'Cookie':pffCookie})
+
+        if not html:
+            irc.reply("ERROR: Failed to fetch {0}.".format(url))
+            self.log.error("ERROR opening {0}".format(url))
+            return
+
+        soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='utf-8')
+        table = soup.find('table', attrs={'class':'sortable'})
+        h2 = 'PFF Team Stats' #soup.find('h2').getText().strip()
+        rows = table.findAll('tr')
+        # container list for output.
+        object_list = []
+        # iterate over each row which is a pick.
+        for row in rows:  # string is constructed conditionally.
+            pickTeam = row.children[0].getText()
+            if pickTeam == "Philadelphia Eagles":
+                appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText())
+            elif pickTeam == "&nbsp;Philadelphia Eagles":
+                appendString = "{0}. {1} - {2}".format(self._bold(pickTeam), row.children[1].getText(), row.children[2].getText(), " .")
+            else:  # we won't have a pick leading up to the draft.
+                appendString = "no matching team"
+            object_list.append(appendString)  # append.
+
+        # output time.
+        irc.reply("{0} :: {1}".format(self._red(h2), " | ".join([i for i in object_list])))
+
+    pffteam = wrap(pffteam, [optional('int')])
 
     def nfldraft(self, irc, msg, args, optyear, optround):
         """[YYYY] [round #]
