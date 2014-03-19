@@ -1910,9 +1910,7 @@ class NFL(callbacks.Plugin):
     nflschedule = wrap(nflschedule, [(getopts({'full':''})), ('somethingWithoutSpaces')])
 
     def nflcountdown(self, irc, msg, args):
-	    """
-        Display the time until the next NFL season starts.
-        """
+        """    Display the time until the next NFL season starts.    """
 
         dDelta = datetime.datetime(2014, 9, 05, 21, 30) - datetime.datetime.now()
         irc.reply("There are {0} days {1} hours {2} minutes {3} seconds until the start of the 2014 NFL Season.".format(\
